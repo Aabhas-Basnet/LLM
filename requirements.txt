@@ -1,0 +1,8 @@
+streamlit
+pandas
+plotly
+spacy
+google-genai
+python-dotenv
+pdfplumber
+tenacity

@@ -74,7 +74,7 @@ def process_career_data(cv_text, target_role, location):
     STRICT INSTRUCTIONS:
     1. Identify 3 ADVANCED technical gaps (Cloud, MLOps, Governance) specific to {location}.
     2. Replace Leadership with Data Storytelling in the spiral.
-    3. Calculate a consistent ATS Score (0-100).
+    3. Calculate a consistent ATS Score (0-100) based on professional match.
     4. Provide 3 Networking events in {location} for April-May 2026.
 
     OUTPUT JSON:
@@ -105,23 +105,28 @@ def process_career_data(cv_text, target_role, location):
 # ==========================================
 st.set_page_config(page_title="Career Intelligence Pro", layout="wide")
 
-# Custom Styling for Unified Metric Cards and Colors
+# Persistent Session State
+if "audit_data" not in st.session_state:
+    st.session_state.audit_data = None
+
+# Professional Styling
 st.markdown("""
 <style>
-    .gap-card { background-color: #1a1c24; border-left: 5px solid #ff1744; padding: 15px; border-radius: 8px; margin-bottom: 10px; color: #e0e0e0; }
-    .job-card { background-color: #1a1c24; border-left: 5px solid #00e676; padding: 15px; border-radius: 8px; margin-bottom: 10px; color: #e0e0e0; }
-    .org-card { background-color: #1a1c24; border-left: 5px solid #2979ff; padding: 15px; border-radius: 8px; margin-bottom: 10px; color: #e0e0e0; }
-    .header-tag { color: #ffffff; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; font-size: 0.75rem; opacity: 0.7; }
+    .gap-card { background-color: #fce4ec; border-left: 5px solid #d81b60; padding: 15px; border-radius: 8px; margin-bottom: 10px; color: #1a1a1a; }
+    .job-card { background-color: #e8f5e9; border-left: 5px solid #2e7d32; padding: 15px; border-radius: 8px; margin-bottom: 10px; color: #1a1a1a; }
+    .org-card { background-color: #e3f2fd; border-left: 5px solid #1565c0; padding: 15px; border-radius: 8px; margin-bottom: 10px; color: #1a1a1a; }
+    .header-tag { font-weight: bold; margin-bottom: 5px; text-transform: uppercase; font-size: 0.75rem; color: #444; }
+    .stButton>button { background-color: #1565c0; color: white; border-radius: 5px; width: 100%; }
 </style>
 """, unsafe_allow_html=True)
 
 st.title("Career Intelligence Dashboard")
-st.text("Strategic Market Alignment | Australian State Analysis")
+st.text("Strategic Market Alignment Analysis")
 
-# Main Input Area
+# Inputs
 col_in1, col_in2, col_in3 = st.columns([2, 1, 1])
 with col_in1:
-    target_role = st.text_input("Target Position", value="Junior Business Analyst")
+    target_role = st.text_input("Target Position", value="Data Business Analyst")
 with col_in2:
     location = st.selectbox("Australian Market", [
         "Adelaide, SA", "Sydney, NSW", "Melbourne, VIC", 
@@ -131,70 +136,71 @@ with col_in2:
 with col_in3:
     uploaded_file = st.file_uploader("Upload CV (PDF)", type="pdf")
 
-# Session State to hold results
-if "audit_data" not in st.session_state:
-    st.session_state.audit_data = None
-
 if uploaded_file and target_role:
-    if st.button("Execute Professional Audit", type="primary"):
-        with st.spinner("Analyzing Market Vectors..."):
+    if st.button("Execute Professional Audit"):
+        with st.spinner("Synthesizing market vectors"):
             try:
                 with pdfplumber.open(uploaded_file) as pdf:
                     text = "\n".join([p.extract_text() for p in pdf.pages if p.extract_text()])
-                
-                # Store in session state to prevent fading
                 st.session_state.audit_data = process_career_data(text, target_role, location)
             except Exception as e:
                 st.error(f"Error: {e}")
 
-# Display Logic (Only if session state is populated)
+# Persistent Result Display
 if st.session_state.audit_data:
     data = st.session_state.audit_data
-    st.divider()
     
-    # EXECUTIVE REVIEW
+    st.divider()
     rev_left, rev_right = st.columns([2, 1])
+    
     with rev_left:
         st.subheader("Executive Review")
         st.write(data['summary'])
+    
     with rev_right:
+        # Theme-aware Gauge
         fig_gauge = go.Figure(go.Indicator(
             mode = "gauge+number",
             value = data['ats_score'],
-            title = {'text': "ATS Score", 'font': {'color': '#2979ff'}},
-            gauge = {'bar': {'color': "#2979ff"}, 'axis': {'range': [0, 100]}, 'bordercolor': "#333"}
+            title = {'text': "ATS Match Score", 'font': {'size': 20}},
+            gauge = {
+                'bar': {'color': "#1565c0"},
+                'axis': {'range': [0, 100]},
+                'bgcolor': "white",
+                'borderwidth': 2,
+                'bordercolor': "#444"
+            }
         ))
-        fig_gauge.update_layout(height=200, margin=dict(t=30, b=0, l=10, r=10), paper_bgcolor='rgba(0,0,0,0)', font={'color': "white"})
+        fig_gauge.update_layout(height=250, margin=dict(t=50, b=0, l=10, r=10), paper_bgcolor='rgba(0,0,0,0)', font={'color': "gray"})
         st.plotly_chart(fig_gauge, use_container_width=True)
 
-    # COLORFUL METRICS SECTION
     st.divider()
     m1, m2, m3 = st.columns(3)
     
     with m1:
-        st.subheader("Technical Gaps")
+        st.markdown("<h4 style='color:#d81b60'>Technical Gaps</h4>", unsafe_allow_html=True)
         for s in data['metrics']['top_skills_gaps']:
-            st.markdown(f"<div class='gap-card'><div class='header-tag'>Critical Skill</div>{s}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div class='gap-card'><div class='header-tag'>Market Gap</div>{s}</div>", unsafe_allow_html=True)
     
     with m2:
-        st.subheader("Job Matches")
+        st.markdown("<h4 style='color:#2e7d32'>Job Matches</h4>", unsafe_allow_html=True)
         for j in data['metrics']['top_jobs']:
-            st.markdown(f"<div class='job-card'><div class='header-tag'>Recommended Role</div>{j}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div class='job-card'><div class='header-tag'>Role</div>{j}</div>", unsafe_allow_html=True)
     
     with m3:
-        st.subheader("Local Organizations")
+        st.markdown("<h4 style='color:#1565c0'>Local Organizations</h4>", unsafe_allow_html=True)
         for c in data['metrics']['top_companies']:
-            st.markdown(f"<div class='org-card'><div class='header-tag'>Target Company</div>{c}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div class='org-card'><div class='header-tag'>Target</div>{c}</div>", unsafe_allow_html=True)
 
-    # VISUALS
     st.divider()
     v_left, v_right = st.columns([1, 1])
+    
     with v_left:
         st.subheader("Professional Aptitude Spiral")
         df_radar = pd.DataFrame(dict(r=list(data['spiral'].values()), theta=list(data['spiral'].keys())))
         fig_radar = px.line_polar(df_radar, r='r', theta='theta', line_close=True)
         fig_radar.update_traces(fill='toself', line_color='#00e676', fillcolor='rgba(0, 230, 118, 0.3)')
-        fig_radar.update_layout(polar=dict(radialaxis=dict(visible=True, range=[0, 10], gridcolor="#444")), paper_bgcolor='rgba(0,0,0,0)', font={'color': "white"})
+        fig_radar.update_layout(polar=dict(radialaxis=dict(visible=True, range=[0, 10], gridcolor="#888")), paper_bgcolor='rgba(0,0,0,0)', font={'color': "gray"})
         st.plotly_chart(fig_radar, use_container_width=True)
 
     with v_right:
@@ -202,7 +208,6 @@ if st.session_state.audit_data:
         st.info(data['roadmap_paragraph'])
         for item in data['roadmap_list']:
             st.write(f"- {item}")
-        
         st.subheader("Regional Networking")
         for event in data['networking']:
             st.success(event)
