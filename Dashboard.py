@@ -27,6 +27,13 @@ client = genai.Client(api_key=API_KEY)
 
 @st.cache_resource
 def load_nlp():
+    # No need for os.system anymore as it's in requirements.txt
+    return spacy.load("en_core_web_sm")
+
+nlp = load_nlp()
+
+@st.cache_resource
+def load_nlp():
     try:
         return spacy.load("en_core_web_sm")
     except:
