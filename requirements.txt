@@ -5,3 +5,4 @@ spacy
 google-genai
 pdfplumber
 tenacity
+python-dotenv
