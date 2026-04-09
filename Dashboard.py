@@ -18,7 +18,7 @@ st.set_page_config(page_title="Career Intel Pro", layout="wide")
 load_dotenv()
 
 # Secure Key Fetch
-API_KEY = os.getenv("GEMINI_API_KEY")
+API_KEY = st.secrets.get("GEMINI_API_KEY") or os.getenv("GEMINI_API_KEY")
 
 if not API_KEY:
     st.error("Missing API Key. Add 'GEMINI_API_KEY' to Streamlit Secrets or your local .env file.")
