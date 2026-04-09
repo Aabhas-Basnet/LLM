@@ -17,7 +17,7 @@ load_dotenv()
 
 # 2. Fetch the key from either .env or Streamlit Secrets
 # This replaces: API_KEY = "YOUR_ACTUAL_KEY_HERE"
-API_KEY = os.getenv("GEMINI_API_KEY") or st.secrets.get("GEMINI_API_KEY")
+API_KEY = os.getenv("GEMINI_API_KEY") 
 
 if not API_KEY:
     st.error("Missing API Key. Please add it to your .env file or Streamlit Secrets.")
@@ -70,7 +70,7 @@ def get_analysis(text, role, loc):
     for attempt in range(3):
         try:
             response = client.models.generate_content(
-                model="gemini-2.5-pro", # Updated to stable high-tier model
+                model="gemini-2.5-flash", # Updated to stable high-tier model
                 contents=prompt,
                 config={'response_mime_type': 'application/json', 'temperature': 0.1}
             )
